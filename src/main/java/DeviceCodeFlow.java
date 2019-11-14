@@ -16,7 +16,7 @@ public class DeviceCodeFlow {
 
     final static String PUBLIC_CLIENT_ID = "de165c80-4281-47c5-b23b-42ec6080db52";
     final static String AUTHORITY_COMMON = "https://login.microsoftonline.com/common/";
-    final static String GRAPH_DEFAULT_SCOPE = "https://graph.microsoft.com/user.read";
+    final static String GRAPH_SCOPE = "https://graph.microsoft.com/user.read";
 
     public static void main(String args[]) throws Exception {
         getAccessTokenByDeviceCodeGrant();
@@ -35,7 +35,7 @@ public class DeviceCodeFlow {
 
         CompletableFuture<IAuthenticationResult> future = app.acquireToken(
                 DeviceCodeFlowParameters.builder(
-                        Collections.singleton(GRAPH_DEFAULT_SCOPE),
+                        Collections.singleton(GRAPH_SCOPE),
                         deviceCodeConsumer)
                         .build());
 

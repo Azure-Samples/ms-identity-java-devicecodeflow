@@ -137,6 +137,28 @@ Now you can navigate to the above URL and it will then prompt to enter the code 
 
 Now you can come back your application and you can see the users list and basic information of the users in the tenant.
 
+## About the code
+
+1. The relevant code for this sample is in the `DeviceCodeFlow.java` file.
+
+The code below calls the `acquireToken` method of PublicClientApplication to which you pass a callback that will display information to the user about where they should navigate to, and which code to enter to initiate a sign-in.
+
+```Java
+PublicClientApplication app = PublicClientApplication.builder(PUBLIC_CLIENT_ID)
+                .authority(AUTHORITY_COMMON)
+                .build();
+
+        Consumer<DeviceCode> deviceCodeConsumer = (DeviceCode deviceCode) -> {
+            System.out.println(deviceCode.message());
+        };
+
+        CompletableFuture<IAuthenticationResult> future = app.acquireToken(
+                DeviceCodeFlowParameters.builder(
+                        Collections.singleton(GRAPH_SCOPE),
+                        deviceCodeConsumer)
+                        .build());
+```
+
 ## Community Help and Support
 
 Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get support from the community.
