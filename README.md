@@ -13,9 +13,9 @@ products:
   - azure
   - azure-active-directory  
   - office-ms-graph
-description: "This sample demonstrates a java console application calling The Microsoft Graph"
+description: "This sample demonstrates calling the Microsoft Graph from a Java console application without a browser for interaction"
 ---
-# Invoking an API protected by Azure AD from a text-only device
+# Invoking an API protected by Azure AD from a device without a browser for interaction
 
 ## About this sample
 
@@ -26,18 +26,18 @@ This sample shows how to use the OAuth 2.0 [device code flow](https://docs.micro
 - Authenticate a user
 - Acquire an [Access token](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for a web API (in this case, the [Microsoft Graph](https://graph.microsoft.com))
 
-To emulate a an app on a device that is not capable of showing a UX, the sample is packaged as a Java console application.
+To emulate an app on a device that is not capable of showing a UX, the sample is packaged as a Java console application.
 The application signs-in users with Azure Active Directory (Azure AD), using the Microsoft Authentication Library for Java (MSAL4J) to obtain a JWT access token through the OAuth 2.0 protocol. The access token is then used to call the Microsoft Graph API to obtain information about the user who signed-in. The sample is structured as such so that you can call your own API.
 
 ![Topology](./ReadmeFiles/Topology.png)
 
 ### Scenario
 
-The application obtains tokens through a two step process especially designed for devices and operating systems that cannot display any UX. Examples of such applications are applications running on iOT, or Command-Line tools (CLI). The idea is that:
+The application obtains tokens through a two step process especially designed for devices and operating systems that cannot display any UX. Examples of such applications are applications running on IoT, or Command-Line tools (CLI). The idea is that:
 
-1. Whenever a user is required to authenticate, the command-line app provides a code and asks the user to use another device (such as an internet-connected smartphone) to navigate to [https://microsoft.com/devicelogin](https://microsoft.com/devicelogin), where the user will be prompted to enter the code provided earlier. Oce the user enters the code, the web page will lead the user through a normal authentication experience, including presenting any consent prompts and take the user through a multi-factor authentication experience if necessary.
+1. Whenever a user is required to authenticate, the command-line app provides a code and asks the user to use another device (such as an internet-connected smartphone) to navigate to [https://microsoft.com/devicelogin](https://microsoft.com/devicelogin), where the user will be prompted to enter the code provided earlier. Once the user enters the code, the web page will lead the user through a normal authentication experience, including presenting any consent prompts and taking the user through a multi-factor authentication experience if necessary.
 
-1. Upon successful authentication, the command-line app will receive the required tokens through a back channel and will use it to perform the web API calls it needs. In this case, the sample retrieves a list os users in the signed-in users tenant from Microsoft Graph and lists that in the window.
+1. Upon successful authentication, the command-line app will receive the required tokens through a back channel and will use it to perform the web API calls it needs. In this case, the sample retrieves a list of users in the signed-in user's tenant from Microsoft Graph and lists it in the window.
 
 ## How to run this sample
 

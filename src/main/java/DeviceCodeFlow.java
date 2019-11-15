@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 public class DeviceCodeFlow {
 
-    final static String PUBLIC_CLIENT_ID = "de165c80-4281-47c5-b23b-42ec6080db52";
+    final static String PUBLIC_CLIENT_ID = "Enter_the_Application_Id_here";
     final static String AUTHORITY_COMMON = "https://login.microsoftonline.com/common/";
     final static String GRAPH_SCOPE = "https://graph.microsoft.com/user.read";
 
