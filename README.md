@@ -21,30 +21,30 @@ description: "This sample demonstrates a java console application calling The Mi
 
 ### Overview
 
-This sample uses the OAuth2 **device code flow** and demonstrates how to leverage MSAL4J from apps that **do not have the capability of offering an interactive authentication experience**. It enables these apps to:
+This sample shows how to use the OAuth 2.0 [device code flow](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-device-code)to sign in users to input-constrained devices such as a smart TV, IoT device, or printer. It leverages [MSAL for Java (MSAL4J)](https://github.com/AzureAD/microsoft-authentication-library-for-java) from an app that **does not have the capability of offering an interactive authentication experience**. It enables these apps to:
 
 - Authenticate a user
-- And call to a web API (in this case, the [Microsoft Graph](https://graph.microsoft.com))
+- Acquire an [Access token](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for a web API (in this case, the [Microsoft Graph](https://graph.microsoft.com))
 
-To emulate a device not capable of showing UX, the sample is packaged as a Java console application.
-The application signs-in users with Azure Active Directory (Azure AD), using the Microsoft Authentication Library for Java (MSAL4J) to obtain a JWT access token through the OAuth 2.0 protocol. The access token is then used to call the Microsoft Graph API to obtain information about the user who signed-in. The sample is structured so that you can call your own API
+To emulate a an app on a device that is not capable of showing a UX, the sample is packaged as a Java console application.
+The application signs-in users with Azure Active Directory (Azure AD), using the Microsoft Authentication Library for Java (MSAL4J) to obtain a JWT access token through the OAuth 2.0 protocol. The access token is then used to call the Microsoft Graph API to obtain information about the user who signed-in. The sample is structured as such so that you can call your own API.
 
 ![Topology](./ReadmeFiles/Topology.png)
 
 ### Scenario
 
-The application obtains tokens through a two steps process especially designed for devices and operating systems that cannot display any UX. Examples of such applications are applications running on iOT, or Command-Line tools (CLI). The idea is that:
+The application obtains tokens through a two step process especially designed for devices and operating systems that cannot display any UX. Examples of such applications are applications running on iOT, or Command-Line tools (CLI). The idea is that:
 
-1. whenever a user authentication is required, the command-line app provides a code and asks the user to use another device (such as an internet-connected smartphone) to navigate to [https://microsoft.com/devicelogin](https://microsoft.com/devicelogin), where the user will be prompted to enter the code. That done, the web page will lead the user through a normal authentication experience, including consent prompts and multi factor authentication if necessary.
+1. Whenever a user is required to authenticate, the command-line app provides a code and asks the user to use another device (such as an internet-connected smartphone) to navigate to [https://microsoft.com/devicelogin](https://microsoft.com/devicelogin), where the user will be prompted to enter the code provided earlier. Oce the user enters the code, the web page will lead the user through a normal authentication experience, including presenting any consent prompts and take the user through a multi-factor authentication experience if necessary.
 
-2. Upon successful authentication, the command-line app will receive the required tokens through a back channel and will use it to perform the web API calls it needs. In this case, the sample displays information about the users in the tenant.
+1. Upon successful authentication, the command-line app will receive the required tokens through a back channel and will use it to perform the web API calls it needs. In this case, the sample retrieves a list os users in the signed-in users tenant from Microsoft Graph and lists that in the window.
 
 ## How to run this sample
 
 To run this sample, you'll need:
 
 - Working installation of [Java 8 or greater](https://openjdk.java.net/install/) and [Maven](https://maven.apache.org/).
-- An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, see [How to get an Azure AD tenant](https://azure.microsoft.com/en-us/documentation/articles/active-directory-howto-tenant/).
+- An Azure Active Directory (Azure AD) tenant. For more information on how to get an Azure AD tenant, see [How to get an Azure AD tenant](https://azure.microsoft.com/documentation/articles/active-directory-howto-tenant/).
 - One or more user accounts in your Azure AD tenant.
 
 ### Step 1:  Clone or download this repository
@@ -141,7 +141,7 @@ Now you can come back your application and you can see the users list and basic 
 
 1. The relevant code for this sample is in the `DeviceCodeFlow.java` file.
 
-The code below calls the `acquireToken` method of PublicClientApplication to which you pass a callback that will display information to the user about where they should navigate to, and which code to enter to initiate a sign-in.
+The code below calls the `acquireToken` method of the **PublicClientApplication** class to which you pass a callback that will display information to the user about where they should navigate to, and which code to enter to initiate a sign-in.
 
 ```Java
 PublicClientApplication app = PublicClientApplication.builder(PUBLIC_CLIENT_ID)
@@ -196,4 +196,4 @@ For more information about the Microsoft identity platform, see:
 
 - [https://aka.ms/aadv2](https://aka.ms/aadv2)
 
-For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414).
+For more information about how OAuth 2.0 protocols work in this scenario and other scenarios, see [Authentication Scenarios for Azure AD](http://go.microsoft.com/fwlink/?LinkId=394414)
