@@ -16,7 +16,7 @@ public class DeviceCodeFlow {
 
     final static String PUBLIC_CLIENT_ID = "Enter_the_Application_Id_here";
     final static String AUTHORITY_COMMON = "https://login.microsoftonline.com/common/";
-    final static String GRAPH_SCOPE = "https://graph.microsoft.com/user.read";
+    final static String GRAPH_SCOPE = "https://graph.microsoft.com/user.readbasic.all";
 
     public static void main(String args[]) throws Exception {
         getAccessTokenByDeviceCodeGrant();
