@@ -20,11 +20,19 @@ public class DeviceCodeFlow {
     private final static String GRAPH_USERS_ENDPOINT = "https://graph.microsoft.com/v1.0/users";
 
     public static void main(String args[]) throws Exception {
-        getAccessTokenByDeviceCodeGrant();
+
+        // Get authentication result from AAD via device code grant
+        IAuthenticationResult authenticationResult = getAccessTokenByDeviceCodeGrant();
+
+        // Use access token from authentication result to call Microsoft Graph.
+        String usersListFromGraph = getUsersListFromGraph(authenticationResult.accessToken());
+
+        System.out.println("Users in the Tenant - " + usersListFromGraph);
+        System.out.println("Press any key to exit ...");
         System.in.read();
     }
 
-    private static void getAccessTokenByDeviceCodeGrant() throws Exception {
+    private static IAuthenticationResult getAccessTokenByDeviceCodeGrant() throws Exception {
         PublicClientApplication app = PublicClientApplication.builder(PUBLIC_CLIENT_ID)
                 .authority(AUTHORITY_COMMON)
                 .build();
@@ -33,33 +41,26 @@ public class DeviceCodeFlow {
             System.out.println(deviceCode.message());
         };
 
-        CompletableFuture<IAuthenticationResult> future = app.acquireToken(
-                DeviceCodeFlowParameters.builder(
-                        Collections.singleton(GRAPH_SCOPE),
-                        deviceCodeConsumer)
-                        .build());
+        DeviceCodeFlowParameters deviceCodeFlowParameters = DeviceCodeFlowParameters.builder(
+                Collections.singleton(GRAPH_SCOPE), deviceCodeConsumer)
+                .build();
+
+        CompletableFuture<IAuthenticationResult> future = app.acquireToken(deviceCodeFlowParameters);
 
         future.handle((res, ex) -> {
             if(ex != null) {
                 System.out.println("Oops! We have an exception of type - " + ex.getClass());
                 System.out.println("Exception message - " + ex.getMessage());
+                throw new RuntimeException(ex);
             }
-            try {
-                String usersListFromGraph = getUsersListFromGraph(res.accessToken());
-                System.out.println("Users in the Tenant = " + usersListFromGraph);
-                System.out.println("Press any key to exit ...");
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
             return res;
         });
 
-        future.join();
+        return future.join();
     }
 
     private static String getUsersListFromGraph(String accessToken) throws IOException {
-
         URL url = new URL(GRAPH_USERS_ENDPOINT);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
