@@ -102,11 +102,6 @@ As a first step you'll need to:
    - In the **Delegated permissions** section, select the **User.Read**, **User.ReadBasic.All** in the list. Use the search box if necessary.
    - Click on the **Add permissions** button at the bottom.
 
-1. At this stage, the permissions are assigned correctly but since the client app does not allow users to interact, the user's themselves cannot consent to these permissions.
-   To get around this problem, we'd let the [tenant administrator consent on behalf of all users in the tenant](https://docs.microsoft.com/azure/active-directory/develop/v2-admin-consent).
-   Click the **Grant admin consent for {tenant}** button, and then select **Yes** when you are asked if you want to grant consent for the requested permissions for all account in the tenant.
-   You need to be the tenant admin to be able to carry out this operation.
-
 ##### Configure the  client app (active-directory-java-deviceprofile) to use your app registration
 
 Open the project in your IDE to configure the code.
