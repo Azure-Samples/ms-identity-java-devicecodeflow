@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -21,8 +22,8 @@ public class DeviceCodeFlow {
 
     public static void main(String args[]) throws Exception {
 
-        // Get authentication result from AAD via device code grant
-        IAuthenticationResult authenticationResult = getAccessTokenByDeviceCodeGrant();
+        // Get access token from Azure Active Directory
+        IAuthenticationResult authenticationResult = getAccessToken();
 
         // Use access token from authentication result to call Microsoft Graph.
         String usersListFromGraph = getUsersListFromGraph(authenticationResult.accessToken());
@@ -32,17 +33,71 @@ public class DeviceCodeFlow {
         System.in.read();
     }
 
-    private static IAuthenticationResult getAccessTokenByDeviceCodeGrant() throws Exception {
-        PublicClientApplication app = PublicClientApplication.builder(PUBLIC_CLIENT_ID)
+    private static IAuthenticationResult getAccessToken() throws Exception {
+
+        PublicClientApplication app = PublicClientApplication
+                .builder(PUBLIC_CLIENT_ID)
                 .authority(AUTHORITY_COMMON)
                 .build();
 
-        Consumer<DeviceCode> deviceCodeConsumer = (DeviceCode deviceCode) -> {
-            System.out.println(deviceCode.message());
-        };
+        // Check if there are any accounts in the token cache. In the case of this sample, we are not loading a token
+        // cache from disk (see aka.ms/msal4j-tokencache) there will be no accounts in the token cache.
+        // Regardless, the sample aims to demonstrate the recommended practice of first attempting
+        // to acquire token silently and if that fails, falling back to acquiring a token interactively
+        // (in this case, via Oauth2 device code flow)
+        Set<IAccount> accountsInTokenCache = app.getAccounts().join();
 
-        DeviceCodeFlowParameters deviceCodeFlowParameters = DeviceCodeFlowParameters.builder(
-                Collections.singleton(GRAPH_SCOPE), deviceCodeConsumer)
+        IAuthenticationResult authenticationResult;
+        if(!accountsInTokenCache.isEmpty()){
+
+            // We select the account that we want to get tokens for. For simplicity, we take the first account
+            // in the token cache. In a production application, you would filter to get the desired account
+            IAccount account = accountsInTokenCache.iterator().next();
+            //If the application has an account in the token cache, we will try to acquire a token silently.
+            authenticationResult = getAccessTokenSilently(app, account);
+        } else {
+            // If token cache is empty, we ask the user to put in their credentials in to the
+            // sign in prompt and consent to the requested permissions.
+            authenticationResult = getAccessTokenByDeviceCodeGrant(app);
+    }
+
+        return authenticationResult;
+    }
+
+    private static IAuthenticationResult getAccessTokenSilently(
+            PublicClientApplication app,
+            IAccount account) {
+
+        IAuthenticationResult result;
+        try {
+
+            SilentParameters parameters = SilentParameters
+                    .builder(Collections.singleton(GRAPH_SCOPE), account)
+                    .build();
+
+            result = app.acquireTokenSilently(parameters).join();
+
+        } catch(Exception ex){
+
+            // If acquiring a token silently failed, lets try acquire token interactively
+            if(ex instanceof MsalException){
+                return getAccessTokenByDeviceCodeGrant(app);
+            }
+
+            System.out.println("Oops! We have an exception of type - " + ex.getClass());
+            System.out.println("Exception message - " + ex.getMessage());
+            throw new RuntimeException(ex);
+        }
+
+        return result;
+    }
+
+    private static IAuthenticationResult getAccessTokenByDeviceCodeGrant(PublicClientApplication app) {
+
+        Consumer<DeviceCode> deviceCodeConsumer = (DeviceCode deviceCode) -> System.out.println(deviceCode.message());
+
+        DeviceCodeFlowParameters deviceCodeFlowParameters = DeviceCodeFlowParameters
+                .builder(Collections.singleton(GRAPH_SCOPE), deviceCodeConsumer)
                 .build();
 
         CompletableFuture<IAuthenticationResult> future = app.acquireToken(deviceCodeFlowParameters);
