@@ -20,7 +20,6 @@
             <version>1.7.29</version>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>
@@ -56,6 +55,4 @@
             </plugin>
         </plugins>
     </build>
-
-
 </project>

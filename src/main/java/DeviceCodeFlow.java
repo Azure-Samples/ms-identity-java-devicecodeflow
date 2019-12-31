@@ -41,7 +41,7 @@ public class DeviceCodeFlow {
                 .build();
 
         // Check if there are any accounts in the token cache. In the case of this sample, we are not loading a token
-        // cache from disk (see aka.ms/msal4j-tokencache) there will be no accounts in the token cache.
+        // cache from disk (see aka.ms/msal4j-tokencache) so there will be no accounts in the token cache.
         // Regardless, the sample aims to demonstrate the recommended practice of first attempting
         // to acquire token silently and if that fails, falling back to acquiring a token interactively
         // (in this case, via Oauth2 device code flow)
