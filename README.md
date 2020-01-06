@@ -24,7 +24,7 @@ description: "This sample demonstrates calling the Microsoft Graph from a Java c
 This sample shows how to use the OAuth 2.0 [device code flow](https://docs.microsoft.com/azure/active-directory/develop/v2-oauth2-device-code)to sign in users to input-constrained devices such as a smart TV, IoT device, or printer. It leverages [MSAL for Java (MSAL4J)](https://github.com/AzureAD/microsoft-authentication-library-for-java) from an app that **does not have the capability of offering an interactive authentication experience**. It enables these apps to:
 
 - Authenticate a user
-- Acquire an [Access token](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for a web API (in this case, the [Microsoft Graph](https://graph.microsoft.com))
+- Acquire an [access token](https://docs.microsoft.com/azure/active-directory/develop/access-tokens) for a web API (in this case, the [Microsoft Graph](https://graph.microsoft.com))
 
 To emulate an app on a device that is not capable of showing a UX, the sample is packaged as a Java console application.
 The application signs-in users with Azure Active Directory (Azure AD), using the Microsoft Authentication Library for Java (MSAL4J) to obtain a JWT access token through the OAuth 2.0 protocol. The access token is then used to call the Microsoft Graph API to obtain information about the user who signed-in. The sample is structured as such so that you can call your own API.
@@ -114,11 +114,11 @@ Open the project in your IDE to configure the code.
 
 From your shell or command line:
 
-- `$ mvn package`
+- `$ mvn clean compile assembly:single`
 
-This will generate a `ms-identity-java-devicecodeflow-dependencies.jar` file in your /targets directory. Run this using your Java executable like below:
+This will generate a `ms-identity-java-devicecodeflow-1.0.jar` file in your /targets directory. Run this using your Java executable like below:
 
-- `$ java -jar ms-identity-java-devicecodeflow-dependencies.jar`
+- `$ java -jar ms-identity-java-devicecodeflow-1.0.jar`
 
 `Or` run it from an IDE.
 
