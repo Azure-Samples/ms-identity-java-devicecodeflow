@@ -3,143 +3,69 @@
 
 import com.microsoft.aad.msal4j.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Collections;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class DeviceCodeFlow {
 
-    private final static String PUBLIC_CLIENT_ID = "Enter_the_Application_Id_here";
-    private final static String AUTHORITY_COMMON = "https://login.microsoftonline.com/common/";
-    private final static String GRAPH_SCOPE = "https://graph.microsoft.com/user.readbasic.all";
-    private final static String GRAPH_USERS_ENDPOINT = "https://graph.microsoft.com/v1.0/users";
+    private final static String CLIENT_ID = "";
+    private final static String AUTHORITY = "https://login.microsoftonline.com/common/";
+    private final static Set<String> SCOPE = Collections.singleton("");
 
     public static void main(String args[]) throws Exception {
-
-        // Get access token from Azure Active Directory
-        IAuthenticationResult authenticationResult = getAccessToken();
-
-        // Use access token from authentication result to call Microsoft Graph.
-        String usersListFromGraph = getUsersListFromGraph(authenticationResult.accessToken());
-
-        System.out.println("Users in the Tenant - " + usersListFromGraph);
-        System.out.println("Press any key to exit ...");
-        System.in.read();
+        IAuthenticationResult result = acquireTokenDeviceCode();
+        System.out.println("Access token: " + result.accessToken());
+        System.out.println("Id token: " + result.idToken());
+        System.out.println("Account username: " + result.account().username());
     }
 
-    private static IAuthenticationResult getAccessToken() throws Exception {
+    private static IAuthenticationResult acquireTokenDeviceCode() throws Exception {
 
-        PublicClientApplication app = PublicClientApplication
-                .builder(PUBLIC_CLIENT_ID)
-                .authority(AUTHORITY_COMMON)
+        // Load token cache from file and initialize token cache aspect. The token cache will have
+        // dummy data, so the acquireTokenSilently call will fail.
+        TokenCacheAspect tokenCacheAspect = new TokenCacheAspect("sample_cache.json");
+
+        PublicClientApplication pca = PublicClientApplication.builder(CLIENT_ID)
+                .authority(AUTHORITY)
+                .setTokenCacheAccessAspect(tokenCacheAspect)
                 .build();
 
-        // Check if there are any accounts in the token cache. In the case of this sample, we are not loading a token
-        // cache from disk (see aka.ms/msal4j-tokencache) so there will be no accounts in the token cache.
-        // Regardless, the sample aims to demonstrate the recommended practice of first attempting
-        // to acquire token silently and if that fails, falling back to acquiring a token interactively
-        // (in this case, via Oauth2 device code flow)
-        Set<IAccount> accountsInTokenCache = app.getAccounts().join();
-
-        IAuthenticationResult authenticationResult;
-        if(!accountsInTokenCache.isEmpty()){
-
-            // We select the account that we want to get tokens for. For simplicity, we take the first account
-            // in the token cache. In a production application, you would filter to get the desired account
-            IAccount account = accountsInTokenCache.iterator().next();
-            //If the application has an account in the token cache, we will try to acquire a token silently.
-            authenticationResult = getAccessTokenSilently(app, account);
-        } else {
-            // If token cache is empty, we ask the user to put in their credentials in to the
-            // sign in prompt and consent to the requested permissions.
-            authenticationResult = getAccessTokenByDeviceCodeGrant(app);
-    }
-
-        return authenticationResult;
-    }
-
-    private static IAuthenticationResult getAccessTokenSilently(
-            PublicClientApplication app,
-            IAccount account) {
+        Set<IAccount> accountsInCache = pca.getAccounts().join();
+        // Take first account in the cache. In a production application, you would filter
+        // accountsInCache to get the right account for the user authenticating.
+        IAccount account = accountsInCache.iterator().next();
 
         IAuthenticationResult result;
         try {
+            SilentParameters silentParameters =
+                    SilentParameters
+                            .builder(SCOPE, account)
+                            .build();
 
-            SilentParameters parameters = SilentParameters
-                    .builder(Collections.singleton(GRAPH_SCOPE), account)
-                    .build();
+            // try to acquire token silently. This call will fail since the token cache
+            // does not have any data for the user you are trying to acquire a token for
+            result = pca.acquireTokenSilently(silentParameters).join();
+        } catch (Exception ex) {
+            if (ex.getCause() instanceof MsalException) {
 
-            result = app.acquireTokenSilently(parameters).join();
+                Consumer<DeviceCode> deviceCodeConsumer = (DeviceCode deviceCode) ->
+                        System.out.println(deviceCode.message());
 
-        } catch(Exception ex){
+                DeviceCodeFlowParameters parameters =
+                        DeviceCodeFlowParameters
+                                .builder(SCOPE, deviceCodeConsumer)
+                                .build();
 
-            // If acquiring a token silently failed, lets try acquire token interactively
-            if(ex instanceof MsalException){
-                return getAccessTokenByDeviceCodeGrant(app);
+                // Try to acquire a token via device code flow. If successful, you should see
+                // the token and account information printed out to console, and the sample_cache.json
+                // file should have been updated with the latest tokens.
+                result = pca.acquireToken(parameters).join();
+            } else {
+                // Handle other exceptions accordingly
+                throw ex;
             }
-
-            System.out.println("Oops! We have an exception of type - " + ex.getClass());
-            System.out.println("Exception message - " + ex.getMessage());
-            throw new RuntimeException(ex);
         }
-
         return result;
-    }
-
-    private static IAuthenticationResult getAccessTokenByDeviceCodeGrant(PublicClientApplication app) {
-
-        Consumer<DeviceCode> deviceCodeConsumer = (DeviceCode deviceCode) -> System.out.println(deviceCode.message());
-
-        DeviceCodeFlowParameters deviceCodeFlowParameters = DeviceCodeFlowParameters
-                .builder(Collections.singleton(GRAPH_SCOPE), deviceCodeConsumer)
-                .build();
-
-        CompletableFuture<IAuthenticationResult> future = app.acquireToken(deviceCodeFlowParameters);
-
-        future.handle((res, ex) -> {
-            if(ex != null) {
-                System.out.println("Oops! We have an exception of type - " + ex.getClass());
-                System.out.println("Exception message - " + ex.getMessage());
-                throw new RuntimeException(ex);
-            }
-
-            return res;
-        });
-
-        return future.join();
-    }
-
-    private static String getUsersListFromGraph(String accessToken) throws IOException {
-        URL url = new URL(GRAPH_USERS_ENDPOINT);
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-        conn.setRequestMethod("GET");
-        conn.setRequestProperty("Authorization", "Bearer " + accessToken);
-        conn.setRequestProperty("Accept", "application/json");
-
-        int httpResponseCode = conn.getResponseCode();
-        if(httpResponseCode == 200) {
-
-            StringBuilder response;
-            try(BufferedReader in = new BufferedReader(
-                    new InputStreamReader(conn.getInputStream()))){
-
-                String inputLine;
-                response = new StringBuilder();
-                while (( inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
-            }
-            return response.toString();
-        } else {
-            return String.format("Connection returned HTTP code: %s with message: %s",
-                    httpResponseCode, conn.getResponseMessage());
-        }
     }
 }

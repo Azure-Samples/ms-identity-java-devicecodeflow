@@ -93,14 +93,13 @@ As a first step you'll need to:
    - In the manifest editor, set the ``allowPublicClient`` property to **true**
    - Click on **Save** in the bar above the manifest editor.
 1. In the app's registration screen, click on the **Authentication** blade in the left and:
-   - In the **Suggested Redirect URIs for Public Clients(mobile, desktop)** select the check box of **https://login.microsoftonline.com/common/oauth2/nativeclient**.
-   - Click on **Save** in the bar above.
-1. In the app's registration screen, click on the **API permissions** blade in the left to open the page where we add access to the Apis that your application needs.
-   - Click the **Add a permission** button and then,
-   - Ensure that the **Microsoft APIs** tab is selected.
-   - In the *Commonly used Microsoft APIs* section, click on **Microsoft Graph**
-   - In the **Delegated permissions** section, select the **User.Read**, **User.ReadBasic.All** in the list. Use the search box if necessary.
-   - Click on the **Add permissions** button at the bottom.
+   - In the **Platform configurations** section select **Add a platform** and create a new **Web** application
+   - Enter the following as the redirect URI: **https://login.microsoftonline.com/common/oauth2/nativeclient**
+   - Click on **Configure** to save your changes.
+1. In the app's registration screen, click on the **API permissions** blade in the left to open the page where we add access to the Apis that your application needs. You will need both **User.Read** and **User.ReadBasic.All** permissions for this sample.
+   - Click the **Add a permission** button, and select **Microsoft Graph**
+   - Choose **Delegated permissions**, and select **User.Read** and **User.ReadBasic.All** in the list. Use the search box if necessary.
+   - Click on the **Add permissions** button at the bottom to save your changes.
 
 ##### Configure the  client app (active-directory-java-deviceprofile) to use your app registration
 
@@ -108,7 +107,7 @@ Open the project in your IDE to configure the code.
 >In the steps below, "ClientID" is the same as "Application ID" or "AppId".
 
 1. Open the `src\main\java\DeviceCodeFlow` class
-1. Find the app key `ClientId` and replace the existing value with the application ID (clientId) of the `active-directory-java-deviceprofile` application copied from the Azure portal.
+1. Find the variable `CLIENT_ID` and replace the existing value with the application ID (clientId) that you recorded in earlier steps.
 
 ### Step 4: Run the sample
 
@@ -124,7 +123,7 @@ This will generate a `ms-identity-java-devicecodeflow-1.0.jar` file in your /tar
 
 Application will start and it will display similar as below:
 
-> To sign in, use a web browser to open the page https://microsoft.com/devicelogin and enter the code DWCCBX774 to authenticate.
+> To sign in, use a web browser to open the page https://microsoft.com/devicelogin and enter the code ABCDEF123 to authenticate.
 
 Now you can navigate to the above URL and it will then prompt to enter the code which is displayed as above. After successful authentication of the user, the webpage displays a window as below:
 
