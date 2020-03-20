@@ -93,7 +93,7 @@ As a first step you'll need to:
    - In the manifest editor, set the ``allowPublicClient`` property to **true**
    - Click on **Save** in the bar above the manifest editor.
 1. In the app's registration screen, click on the **Authentication** blade in the left and:
-   - In the **Platform configurations** section select **Add a platform** and create a new **Web** application
+   - In the **Platform configurations** section select **Add a platform** and create a new **Mobile and desktop** application
    - Enter the following as the redirect URI: **https://login.microsoftonline.com/common/oauth2/nativeclient**
    - Click on **Configure** to save your changes.
 1. In the app's registration screen, click on the **API permissions** blade in the left to open the page where we add access to the Apis that your application needs. You will need both **User.Read** and **User.ReadBasic.All** permissions for this sample.
